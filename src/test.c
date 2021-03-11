@@ -85,8 +85,6 @@ int main(int argc, char* argv[])
                 return 1;
             }
         }
-
-        LOG_INFO("Escape test #%d passed\n", i);
     }
 
     // Replace tests
@@ -138,10 +136,9 @@ int main(int argc, char* argv[])
             LOG_FLUSH();
             return 1;
         }
-
-        LOG_INFO("Replace test #%d passed\n", i);
     }
 
+    LOG_INFO("All tests passed\n");
     LOG_FLUSH();
     return 0;
 }
