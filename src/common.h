@@ -36,6 +36,10 @@ struct String
 };
 
 bool CharIsWhitespace(char c);
+char CharToLower(char c);
+char CharToUpper(char c);
+int CharDecDigitToInt(char c);
+int CharHexDigitToInt(char c);
 
 struct String ToString(const char* cString);
 bool ToCString(const struct String string, size_t bufferSize, char buffer[]);

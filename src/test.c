@@ -66,6 +66,17 @@ int main(int argc, char* argv[])
         {
             ToString("\\\\\\\\\\\\\\"),
             nullString
+        },
+        {
+            ToString("\\x00\\x01\\x02\\x03\\x04"),
+            {
+                .size = 5,
+                .str = "\x00\x01\x02\x03\x04"
+            }
+        },
+        {
+            ToString("\\xab\\xba\\xff\\xfc\\xf1\\x9f\\x0c"),
+            ToString("\xab\xba\xff\xfc\xf1\x9f\x0c")
         }
     };
 

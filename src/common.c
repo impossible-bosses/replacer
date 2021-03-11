@@ -11,7 +11,7 @@
 #error "Unsupported platform"
 #endif
 
-const struct String emptyString = {0};
+const struct String nullString = {0};
 
 void MemCopy(void* dst, const void* src, size_t bytes)
 {
@@ -25,6 +25,42 @@ void MemCopy(void* dst, const void* src, size_t bytes)
 bool CharIsWhitespace(char c)
 {
     return c == '\n' || c == '\r' || c == '\t' || c == ' ';
+}
+
+char CharToLower(char c)
+{
+    if ('A' <= c && c <= 'Z') {
+        return c - 'A' + 'a';
+    }
+    return c;
+}
+
+char CharToUpper(char c)
+{
+    if ('a' <= c && c <= 'z') {
+        return c - 'a' + 'A';
+    }
+    return c;
+}
+
+int CharDecDigitToInt(char c)
+{
+    if ('0' > c || c > '9') {
+        return -1;
+    }
+    return c - '0';
+}
+
+int CharHexDigitToInt(char c)
+{
+    const char cl = CharToLower(c);
+    if ('0' <= cl && cl <= '9') {
+        return cl - '0';
+    }
+    if ('a' <= cl && cl <= 'f') {
+        return cl - 'a' + 10;
+    }
+    return -1;
 }
 
 struct String ToString(const char* cString)
@@ -87,9 +123,15 @@ bool StringEqualCaseInsensitive(const struct String string1, const struct String
 
 struct String StringSlice(const struct String string, size_t start, size_t end)
 {
-    DEBUG_ASSERT(start < string.size);
-    DEBUG_ASSERT(end <= string.size);
-    DEBUG_ASSERT(end >= start);
+    if (start >= string.size) {
+        return nullString;
+    }
+    if (end > string.size) {
+        end = string.size;
+    }
+    if (start > end) {
+        return nullString;
+    }
 
     struct String result = {
         .size = end - start,
@@ -145,7 +187,7 @@ struct String StringTrim(const struct String string)
         newStart++;
     }
     if (newStart >= string.size) {
-        return emptyString;
+        return nullString;
     }
 
     int newEnd = (int)string.size - 1;
@@ -153,7 +195,7 @@ struct String StringTrim(const struct String string)
         newEnd--;
     }
     if (newEnd < 0) {
-        return emptyString;
+        return nullString;
     }
 
     return StringSlice(string, newStart, newEnd);

@@ -58,53 +58,104 @@ bool UnescapeChar(char c, char* outC)
     return true;
 }
 
+size_t UnescapeSequence(const struct String sequence, char* outC)
+{
+    if (sequence.size == 0) {
+        return 0;
+    }
+
+    size_t size = 1;
+    switch (sequence.str[0]) {
+    case '\\': {
+        *outC = '\\';
+    } break;
+    case '0': {
+        *outC = 0;
+    } break;
+    case 'n': {
+        *outC = '\n';
+    } break;
+    case 'r': {
+        *outC = '\r';
+    } break;
+    case 't': {
+        *outC = '\t';
+    } break;
+    case 'x': {
+        if (sequence.size < 3) {
+            size = 0;
+        }
+        else {
+            size = 3;
+            const int digit1 = CharHexDigitToInt(sequence.str[1]);
+            const int digit2 = CharHexDigitToInt(sequence.str[2]);
+            if (digit1 == -1 || digit2 == -1) {
+                return 0;
+            }
+            const unsigned char c = digit1 * 16 + digit2;
+            *outC = c;
+        }
+    } break;
+    default: {
+        size = 0;
+    } break;
+    }
+
+    return size;
+}
+
+bool UnescapeString(const struct String str, struct String* outStr, bool sizeOnly)
+{
+    size_t ind = 0;
+    for (size_t i = 0; i < str.size; i++) {
+        if (str.str[i] == '\\') {
+            const struct String sequence = StringSlice(str, i + 1, str.size);
+            char escC;
+            const size_t escResult = UnescapeSequence(sequence, &escC);
+            if (escResult == 0) {
+                return false;
+            }
+            if (!sizeOnly) {
+                if (ind >= outStr->size) {
+                    return false;
+                }
+                outStr->str[ind] = escC;
+            }
+            ind++;
+            i += escResult;
+        }
+        else {
+            if (!sizeOnly) {
+                if (ind >= outStr->size) {
+                    return false;
+                }
+                outStr->str[ind] = str.str[i];
+            }
+            ind++;
+        }
+    }
+
+    if (sizeOnly) {
+        outStr->size = ind;
+    }
+    else if (ind != outStr->size) {
+        return false;
+    }
+    return true;
+}
+
 struct String Unescape(const struct String str)
 {
     const struct String nullString = {0};
-    size_t size = 0;
-
-    for (size_t i = 0; i < str.size; i++) {
-        if (str.str[i] == '\\') {
-            if (i == str.size - 1) {
-                // Error: escape at the end of the string
-                return nullString;
-            }
-
-            i++;
-            char c;
-            if (!UnescapeChar(str.str[i], &c)) {
-                LOG_ERROR("Unrecognized escape char \"%c\"\n", str.str[i]);
-                return nullString;
-            }
-            size++;
-        }
-        else {
-            size++;
-        }
+    struct String result;
+    if (!UnescapeString(str, &result, true)) {
+        return nullString;
     }
 
-    struct String result = StringAlloc(size);
-    size = 0;
-    for (size_t i = 0; i < str.size; i++) {
-        if (str.str[i] == '\\') {
-            if (i == str.size - 1) {
-                // Error: escape at the end of the string
-                StringFree(result);
-                return nullString;
-            }
-
-            i++;
-            char c;
-            if (!UnescapeChar(str.str[i], &c)) {
-                LOG_ERROR("Unrecognized escape char \"%c\"\n", str.str[i]);
-                StringFree(result);
-                return nullString;
-            }
-            result.str[size++] = c;
-        }
-        else {
-            result.str[size++] = str.str[i];
-        }
+    result = StringAlloc(result.size);
+    if (!UnescapeString(str, &result, false)) {
+        return nullString;
     }
+
     return result;
 }
