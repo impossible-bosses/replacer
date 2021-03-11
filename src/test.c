@@ -111,6 +111,18 @@ int main(int argc, char* argv[])
             ToString("Impossible Bosses DEV MAP"),
             ToString("Impossible Bosses vX.Y.ZZ"),
             ToString("test2-out.w3i")
+        },
+        {
+            ToString("test3-in.w3i"),
+            {
+                .size = 18 + 1 + 1 + 8,
+                .str = "LoadingScreen2.mdx\0\x20\0\0\0\0\0\0\0\0"
+            },
+            {
+                .size = 18 + 1,
+                .str = "LoAdInGsCrEeN2.mDx\0"
+            },
+            ToString("test3-out.w3i")
         }
     };
 
