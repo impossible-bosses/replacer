@@ -157,5 +157,3 @@ test "unescape"
     try testUnescapeFail(allocator, "\\y");
     try testUnescapeFail(allocator, "\\x00\\x01\\x02\\x03\\x0r");
 }
-
-test "replace"
